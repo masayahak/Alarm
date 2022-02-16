@@ -2,7 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="masayah.mysimple.alarm">
 
-    <uses-permission android:name="android.permission.ELAPSED_REALTIME_WAKEUP"/>
+    <!-- アラームからアプリの自動起動を許可する。 -->
+    <uses-permission android:name="android.permission.ELAPSED_REALTIME_WAKEUP" />
+
+    <!-- OS再起動時に自動でアラームを登録する。 -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -11,7 +16,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Alarm">
         <activity
-            android:name=".MainActivity"
+            android:name=".ActivityAfterNotification"
+            android:exported="false" />
+        <activity
+            android:name=".ActivityMain"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,8 +27,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <receiver android:name=".TestAlarmReceiver" />
-        <receiver android:name=".TestNotifyReceiver" />
+
+        <!-- 通知を発行するレシーバー -->
+        <receiver android:name=".NotificationReceiver" />
+
+        <receiver android:name=".SampleBootReceiver"
+            android:exported="true"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

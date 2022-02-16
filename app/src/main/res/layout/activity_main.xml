@@ -4,17 +4,61 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".ActivityMain">
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" >
+
+        <RadioButton
+            android:id="@+id/after5Seconds"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5秒後"
+            android:checked="true"
+            android:layout_marginStart="10dp"
+            />
+        <RadioButton
+            android:id="@+id/directTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5分後を時刻指定"
+            android:layout_marginStart="10dp"
+            />
+    </RadioGroup>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="134dp" />
 
     <Button
         android:id="@+id/setAlarm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Set Alarm"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/guideline2"
+        />
+
+    <Button
+        android:id="@+id/pushNotification"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Set Notify"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/setAlarm"
         android:layout_marginTop="48dp"
         />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

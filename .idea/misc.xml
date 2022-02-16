@@ -3,7 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/sin60/AndroidStudioProjects/@MySimple/Alarm/app/src/main/res/layout/activity_after_notification.xml" value="0.33469202898550726" />
         <entry key="..\:/Users/sin60/AndroidStudioProjects/@MySimple/Alarm/app/src/main/res/layout/activity_main.xml" value="0.33" />
+        <entry key="..\:/Users/sin60/AndroidStudioProjects/@MySimple/Alarm/app/src/main/res/layout/notification_alarm.xml" value="0.14944275582573455" />
       </map>
     </option>
   </component>
