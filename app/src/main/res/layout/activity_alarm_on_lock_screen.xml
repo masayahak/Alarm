@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    >
+
+    <TextView
+        android:id="@+id/staticMessage1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="お薬を飲みましたか？"
+        android:textColor="@color/white"
+        android:textSize="26sp"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/timing"
+        />
+
+    <TextView
+        android:id="@+id/timing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="朝食 後"
+        android:textColor="@color/white"
+        android:textSize="26sp"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/scheduleTime" />
+
+    <TextView
+        android:id="@+id/scheduleTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="casual"
+        android:gravity="center"
+        android:text="07:00"
+        android:textColor="@color/white"
+        android:textSize="80sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/medicine"
+        />
+
+    <ImageButton
+        android:id="@+id/buttonAddAlarm"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:contentDescription="アラームを追加する"
+        android:backgroundTint="@color/white"
+        app:tint="@color/dark_gray"
+        android:layout_marginStart="20dp"
+        app:layout_constraintStart_toEndOf="@id/scheduleTime"
+        app:layout_constraintTop_toTopOf="@id/scheduleTime"
+        app:layout_constraintBottom_toBottomOf="@id/scheduleTime"
+        app:srcCompat="@drawable/ic_add_alarm"
+        />
+
+    <TextView
+        android:id="@+id/medicine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="アレグラ1錠 ビタミンＤ1錠"
+        android:textColor="@color/white"
+        android:textSize="26sp"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/hGuideLine1" />
+
+    <!-- ガイドライン -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/hGuideLine1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.65" />
+
+    <Button
+        android:id="@+id/buttonTaken"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:text="お薬を飲んだら長押し"
+        android:textSize="20sp"
+        android:backgroundTint="@color/white"
+        android:textColor="@color/black"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/hGuideLine1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

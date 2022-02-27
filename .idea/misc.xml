@@ -3,7 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/sin60/AndroidStudioProjects/@MySimple/Alarm/app/src/main/res/drawable/ic_add_alarm.xml" value="0.1575" />
+        <entry key="..\:/Users/sin60/AndroidStudioProjects/@MySimple/Alarm/app/src/main/res/drawable/ic_medical_services.xml" value="0.302" />
+        <entry key="..\:/Users/sin60/AndroidStudioProjects/@MySimple/Alarm/app/src/main/res/drawable/ic_pill.xml" value="0.302" />
         <entry key="..\:/Users/sin60/AndroidStudioProjects/@MySimple/Alarm/app/src/main/res/layout/activity_after_notification.xml" value="0.33469202898550726" />
+        <entry key="..\:/Users/sin60/AndroidStudioProjects/@MySimple/Alarm/app/src/main/res/layout/activity_alarm.xml" value="0.27708333333333335" />
+        <entry key="..\:/Users/sin60/AndroidStudioProjects/@MySimple/Alarm/app/src/main/res/layout/activity_alarm_on_lock_screen.xml" value="0.17882472137791286" />
         <entry key="..\:/Users/sin60/AndroidStudioProjects/@MySimple/Alarm/app/src/main/res/layout/activity_main.xml" value="0.33" />
         <entry key="..\:/Users/sin60/AndroidStudioProjects/@MySimple/Alarm/app/src/main/res/layout/notification_alarm.xml" value="0.14944275582573455" />
       </map>

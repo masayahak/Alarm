@@ -1,15 +1,18 @@
 package masayah.mysimple.alarm
 
-import android.annotation.SuppressLint
-import android.app.*
+import android.app.AlarmManager
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.SystemClock
-import android.widget.Toast
+import android.os.PowerManager
 import androidx.appcompat.app.AppCompatActivity
 import masayah.mysimple.alarm.databinding.ActivityMainBinding
+import masayah.mysimple.alarm.receiver.Receiver1_PreAlarm
+import masayah.mysimple.alarm.receiver.Receiver2_ActivateAlarm
+import masayah.mysimple.alarm.receiver.Receiver3_StopMusic
 import java.util.*
 
 
@@ -18,105 +21,210 @@ class ActivityMain : AppCompatActivity() {
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
 
-    @SuppressLint("UnspecifiedImmutableFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // アプリ起動時にアラームに関する通知が表示されている場合は
+        //アラーム画面を表示する。
+
+        // 通知が存在するか？
+        if (isNotificationExist(this)) {
+            // アラーム画面を表示する
+            val intent = Intent(applicationContext, ActivityAlarmOnLockScreen::class.java)
+            startActivity(intent)
+        }
 
         _binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
 
-        // アラーム（時間指定：５秒ご起動）のテスト
-        binding.setAlarm.setOnClickListener {
+        // アラームのテスト
+        binding.setPreAlarm.setOnClickListener {
 
-            val isAfter5Seconds = binding.after5Seconds.isChecked
+            // 事前通知
+            setPreAlarm(this, 5)
+            // 本通知予約
+            setAlarm(this, 30)
+            // N分後に音楽を強制的に停止する
+            setAutoStopMusic(this, 60)
 
-            // アラーム（特定の時間に起動するキュー）を作成する。
-            setAlarm(this, isAfter5Seconds)
-
-            // アラームを作成したらアプリ終了する。
+            // 事前アラームを作成したらアプリ終了する。
             this.finish()
             this.moveTaskToBack(true)
-
         }
 
-        // 通知機能の直接起動テスト
-        binding.pushNotification.setOnClickListener {
-            NotificationReceiver.notifyMessage(this)
+        // 音楽再生テスト
+        binding.soundTest.setOnClickListener {
+            soundTest()
+        }
+
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        try {
+            AlarmMusic.dispose()
+        }
+        catch (ex: Exception) {
         }
     }
 
-    // ──────────────────────────────────────────────────────
-    // 指定された時刻（テストでは5秒後）に、自分が登録したサービスを起動しろと登録する。
-    // 起動して欲しいサービス：NotificationReceiver
-    // ──────────────────────────────────────────────────────
-    private fun setAlarm(context: Context, isAfter5Seconds: Boolean) {
+    private fun soundTest() {
+        var soundTestString = binding.soundTest.text
 
-        val alarmIntent = Intent(context, NotificationReceiver::class.java)
+        if (Regex(" 再生中").containsMatchIn(soundTestString)) {
+            // アラームを止める
+            try {
+                AlarmMusic.stop()
+            }
+            catch (ex: Exception) {
+            }
 
-        // requestCodeが0だと、ハマるケースがあったらしい
-        val alarmPendingIntent: PendingIntent? =
-            PendingIntent.getBroadcast(context, 764, alarmIntent, PendingIntent.FLAG_IMMUTABLE or FLAG_UPDATE_CURRENT)
+            soundTestString = "音がちゃんと鳴るかテスト"
+            binding.soundTest.text = soundTestString
 
-        val alarmMgr = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
-
-        // 既にアラームが登録されていたら、前のアラームをキャンセルする
-        if (alarmPendingIntent != null && alarmMgr != null) {
-            alarmMgr.cancel(alarmPendingIntent)
-        }
-
-        if (isAfter5Seconds) {
-            testAfter5Seconds(alarmMgr, alarmPendingIntent)
         } else {
-            testDirectTime(alarmMgr, alarmPendingIntent)
+            // アラームを鳴らす
+            AlarmMusic.create(this.applicationContext)
+            AlarmMusic.start()
+
+            soundTestString = "音がちゃんと鳴るかテスト 再生中"
+            binding.soundTest.text = soundTestString
         }
     }
 
-    // 5分後の時刻を予定時刻としてアラームをセットする
-    private fun testDirectTime (alarmMgr : AlarmManager?, alarmPendingIntent: PendingIntent?) {
+    companion object {
 
-        // Set the alarm to start at approximately 2:00 p.m.
-        val calendar: Calendar =
-            Calendar.getInstance(
-                TimeZone.getTimeZone("Asia/Tokyo"),
-                Locale.JAPAN).apply {
-            timeInMillis = System.currentTimeMillis()
-        }.also {
-            it.add(Calendar.MINUTE ,5)
+        // アラーム通知を表示中か？
+        private fun isNotificationExist(context: Context) : Boolean {
+            val mNotificationManager = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            val notifications = mNotificationManager.activeNotifications
+            for (notification in notifications) {
+                if (notification.id == Constants.PRE_NOTIFY_ID) {
+                    return true
+                }
+                if (notification.id == Constants.NOTIFY_ON_LOCK_SCREEN_NOTIFY_ID) {
+                    return true
+                }
+            }
+            return false
         }
 
-        val hourString = calendar.get(Calendar.HOUR_OF_DAY).toString().padStart(2, '0')
-        val minuteString = calendar.get(Calendar.MINUTE).toString().padStart(2, '0')
-        val messageString = "予定時刻 $hourString:$minuteString"
+        // ──────────────────────────────────────────────────────
+        // 事前アラーム
+        // ──────────────────────────────────────────────────────
+        fun setPreAlarm(context: Context, duration: Int) {
 
-        Toast.makeText(this,messageString, Toast.LENGTH_LONG).show()
+            val alarmIntent = Intent(context, Receiver1_PreAlarm::class.java)
+            val alarmPendingIntent =
+                PendingIntent.getBroadcast(
+                    context,
+                    Constants.PRE_NOTIFY_REQUEST_CODE,
+                    alarmIntent,
+                    PendingIntent.FLAG_IMMUTABLE or FLAG_UPDATE_CURRENT
+                )
 
+            val alarmMgr = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
 
-        // Dozeモードでも強制的に起動させる setAndAllowWhileIdle
-        alarmMgr?.setAndAllowWhileIdle(
+            // 既にアラームが登録されていたら、前のアラームをキャンセルする
+            if (alarmPendingIntent != null && alarmMgr != null) {
+                alarmMgr.cancel(alarmPendingIntent)
+            }
 
-            // RTC : 時刻（AM08:00など）でアラームをセット
-            AlarmManager.RTC_WAKEUP,
-            calendar.timeInMillis,
-            alarmPendingIntent
-        )
+            // 予定時刻を取得
+            val alarmCalendar = getAlarmCalendar(duration)
+
+            // Dozeモードでも強制的に起動させる
+            alarmMgr?.setAndAllowWhileIdle(
+                AlarmManager.RTC,
+                alarmCalendar.timeInMillis,
+                alarmPendingIntent
+            )
+        }
+
+        // ──────────────────────────────────────────────────────
+        // 本アラーム
+        // もしもスマホの電源が入っている場合 → 通知
+        // もしも電源OFFでロックされている場合 → フルスクリーン
+        // ──────────────────────────────────────────────────────
+        fun setAlarm(context: Context, duration: Int) {
+
+            val alarmIntent = Intent(context, Receiver2_ActivateAlarm::class.java)
+            val alarmPendingIntent =
+                PendingIntent.getBroadcast(
+                    context,
+                    Constants.NOTIFY_ON_LOCK_SCREEN_REQUEST_CODE,
+                    alarmIntent,
+                    PendingIntent.FLAG_IMMUTABLE or FLAG_UPDATE_CURRENT
+                )
+
+            val alarmMgr = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+
+            // 既にアラームが登録されていたら、前のアラームをキャンセルする
+            if (alarmPendingIntent != null && alarmMgr != null) {
+                alarmMgr.cancel(alarmPendingIntent)
+            }
+
+            // 予定時刻を取得
+            val alarmCalendar = getAlarmCalendar(duration)
+
+            // Dozeモードでも強制的に起動させる
+            alarmMgr?.setAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                alarmCalendar.timeInMillis,
+                alarmPendingIntent
+            )
+
+        }
+
+        // ──────────────────────────────────────────────────────
+        // アラーム音楽停止
+        // ──────────────────────────────────────────────────────
+        fun setAutoStopMusic(context: Context, duration: Int) {
+
+            val stopMusicIntent = Intent(context, Receiver3_StopMusic::class.java)
+            val stopMusicPendingIntent =
+                PendingIntent.getBroadcast(
+                    context,
+                    Constants.STOP_MUSIC_REQUEST_CODE,
+                    stopMusicIntent,
+                    PendingIntent.FLAG_IMMUTABLE or FLAG_UPDATE_CURRENT
+                )
+
+            val alarmMgr = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
+
+            // 既にアラームが登録されていたら、前のアラームをキャンセルする
+            if (stopMusicPendingIntent != null && alarmMgr != null) {
+                alarmMgr.cancel(stopMusicPendingIntent)
+            }
+
+            // 予定時刻を取得
+            val alarmCalendar = getAlarmCalendar(duration)
+
+            // Dozeモードでも強制的に起動させる
+            alarmMgr?.setAndAllowWhileIdle(
+                AlarmManager.RTC,
+                alarmCalendar.timeInMillis,
+                stopMusicPendingIntent
+            )
+        }
+
+        // 予定時刻を取得
+        private fun getAlarmCalendar (duration: Int): Calendar {
+
+            val calendar: Calendar =
+                Calendar.getInstance(
+                    TimeZone.getTimeZone("Asia/Tokyo"),
+                    Locale.JAPAN
+                ).apply {
+                    timeInMillis = System.currentTimeMillis()
+                }.also {
+                    // 現在時刻のN秒後とする
+                    it.add(Calendar.SECOND, duration)
+                }
+
+            return calendar
+        }
+
     }
-
-
-    // テスト用に5秒後にアラームをセットする
-    private fun testAfter5Seconds (alarmMgr : AlarmManager?, alarmPendingIntent: PendingIntent?) {
-
-        // Dozeモードでも強制的に起動させる setAndAllowWhileIdle
-        alarmMgr?.setAndAllowWhileIdle(
-
-            // ELAPSED_REALTIME_WAKEUP : 経過時間（30秒後など）でアラームをセット
-            AlarmManager.ELAPSED_REALTIME_WAKEUP,
-
-            // このテストでは予定時刻はキューを要求されてから「5秒後」とする。
-            // 実装は当然AM8:00だったりの直接時刻指定
-            SystemClock.elapsedRealtime() + 5 * 1000,
-            alarmPendingIntent
-        )
-    }
-
 }

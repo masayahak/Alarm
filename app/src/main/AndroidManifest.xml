@@ -2,11 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="masayah.mysimple.alarm">
 
-    <!-- アラームからアプリの自動起動を許可する。 -->
-    <uses-permission android:name="android.permission.ELAPSED_REALTIME_WAKEUP" />
-
-    <!-- OS再起動時に自動でアラームを登録する。 -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -16,9 +13,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Alarm">
         <activity
-            android:name=".ActivityAfterNotification"
-            android:exported="false" />
-        <activity
             android:name=".ActivityMain"
             android:exported="true">
             <intent-filter>
@@ -27,18 +21,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- 通知を発行するレシーバー -->
-        <receiver android:name=".NotificationReceiver" />
-
-        <receiver android:name=".SampleBootReceiver"
-            android:exported="true"
-            android:enabled="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-
+        <activity
+            android:name=".ActivityAlarmOnLockScreen"
+            android:launchMode="singleTop"
+            android:showOnLockScreen="true" />
+        <receiver
+            android:name=".receiver.Receiver1_PreAlarm"
+            />
+        <receiver
+            android:name=".receiver.Receiver2_ActivateAlarm"
+            android:showOnLockScreen="true" />
+        <receiver
+            android:name=".receiver.Receiver3_StopMusic"
+            />
     </application>
 
 </manifest>
